@@ -1,3 +1,12 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.text-outline {
+    text-shadow: 2px 2px 4px rgba(255, 255, 0, 0.7); /* Yellow outline */
+  }
+
+.text-stroke {
+    -webkit-text-stroke: 1px red;  /* Yellow stroke */
+    color: yellow;  /* Red fill for text */
+  }

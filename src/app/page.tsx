@@ -32,7 +32,10 @@ export default function Home() {
   return (
     <div className="p-8 bg-black text-green-500 font-bold min-h-screen flex justify-center items-center">
       <div className="w-full max-w-md">  {/* This ensures that the form doesn’t stretch too wide on large screens */}
-        <h1 className="text-3xl mb-4 text-center">Enrollment TETETETSTSTST Form</h1>
+        {/* <h1 className="text-3xl mb-4 text-center">Enrollment Form</h1> */}
+        <h1 className="text-3xl mb-4 text-stroke text-center">
+          ENROLLMENT FORM
+        </h1>
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Name input */}
           <div className="flex flex-col">
