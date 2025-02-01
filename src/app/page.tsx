@@ -4,6 +4,8 @@ import { useState } from "react";
 import { supabase } from "@/supabaseClient";
 import { Button } from "@/components/ui/button";
 import { CheckIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css"
 
 const locations = ["Royal Oak", "OakBay", "Langford"];
 
