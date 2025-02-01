@@ -15,6 +15,7 @@ export default function EnrollmentForm() {
   const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
+  const [dob, setDob] = useState<Date | null>(null); // State for date of birth
 
   let hoverTimeout: NodeJS.Timeout;
 
@@ -44,8 +45,9 @@ export default function EnrollmentForm() {
       alert("Please select at least one location.");
       return;
     }
+    const formattedDob = dob.toISOString().split("T")[0];
 
-    const enrollmentData = { name, email, locations: selectedLocations };
+    const enrollmentData = { name, email, locations: selectedLocations, dob: formattedDob };
 
     const { error } = await supabase.from("enrollments").insert([enrollmentData]);
     if (error) {
@@ -55,6 +57,7 @@ export default function EnrollmentForm() {
       setName("");
       setEmail("");
       setSelectedLocations([]);
+      setDob(null);
     }
   };
 
@@ -133,6 +136,22 @@ export default function EnrollmentForm() {
                 ))}
               </div>
             )}
+          </div>
+
+             {/* Date of Birth input */}
+             <div className="flex flex-col">
+            <label htmlFor="dob" className="block text-lg text-left text-green-500">
+              Child's Date of Birth
+            </label>
+            <DatePicker
+              selected={dob}
+              onChange={(date: Date) => setDob(date)}
+              className="w-full p-2 mt-1 rounded bg-white text-black transform hover:scale-105 hover:bg-red-500 hover:text-yellow-500 transition-all duration-300"
+              dateFormat="MM/dd/yyyy" // Format the date
+              showYearPicker // This allows year selection with a scrollable year picker
+              maxDate={new Date()} // Don't allow selecting future dates
+              placeholderText="Select Date of Birth"
+            />
           </div>
 
           {/* Submit button */}
