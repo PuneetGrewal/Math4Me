@@ -1,9 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import React, { useRef, useState, useEffect } from 'react';
 import { supabase } from "@/supabaseClient";
 import { Button } from "@/components/ui/button";
 import { CheckIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
+import { CalendarIcon } from "@heroicons/react/24/outline";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { PhoneIcon } from "@heroicons/react/24/outline";
+
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css"
 
@@ -16,8 +21,21 @@ export default function EnrollmentForm() {
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
   const [dob, setDob] = useState<Date | null>(null); // State for date of birth
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [subjectOpen, setSubjectOpen] = useState(false);
+  const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
+  const subjects = ["Math", "Chemistry", "Biology", "Science", "Physics"];
 
   let hoverTimeout: NodeJS.Timeout;
+
+  const handleSubjectSelect = (subject: string) => {
+    setSelectedSubjects((prev) => {
+      if (prev.includes(subject)) {
+        return prev.filter((item) => item !== subject);
+      }
+      return [...prev, subject];
+    });
+  };
 
   const handleSelect = (location: string) => {
     setSelectedLocations((prev) =>
@@ -47,7 +65,7 @@ export default function EnrollmentForm() {
     }
     const formattedDob = dob.toISOString().split("T")[0];
 
-    const enrollmentData = { name, email, locations: selectedLocations, dob: formattedDob };
+    const enrollmentData = { name, email, locations: selectedLocations, dob: formattedDob, subjects: selectedSubjects, phoneNumber };
 
     const { error } = await supabase.from("enrollments").insert([enrollmentData]);
     if (error) {
@@ -56,8 +74,11 @@ export default function EnrollmentForm() {
       setSuccessMessage("Enrollment successful!");
       setName("");
       setEmail("");
+      setPhoneNumber("");
       setSelectedLocations([]);
       setDob(null);
+      setSelectedSubjects([]);
+
     }
   };
 
@@ -138,21 +159,84 @@ export default function EnrollmentForm() {
             )}
           </div>
 
-             {/* Date of Birth input */}
-             <div className="flex flex-col">
-            <label htmlFor="dob" className="block text-lg text-left text-green-500">
-              Child's Date of Birth
-            </label>
-            <DatePicker
-              selected={dob}
-              onChange={(date: Date) => setDob(date)}
-              className="w-full p-2 mt-1 rounded bg-white text-black transform hover:scale-105 hover:bg-red-500 hover:text-yellow-500 transition-all duration-300"
-              dateFormat="MM/dd/yyyy" // Format the date
-              showYearPicker // This allows year selection with a scrollable year picker
-              maxDate={new Date()} // Don't allow selecting future dates
-              placeholderText="Select Date of Birth"
-            />
-          </div>
+                {/* Date of Birth input */}
+              <div className="flex flex-col">
+                <h2 className="text-xl font-bold text-green-500 mb-2">Child's Date of Birth</h2> {/* Title */}
+                <div className="relative">
+                <DatePicker
+                  selected={dob}
+                  onChange={(date: Date) => setDob(date)}
+                  className="w-full p-2 mt-1 rounded bg-white text-black transform hover:scale-105 hover:bg-red-500 hover:text-yellow-500 transition-all duration-300 pl-10"
+                  dateFormat="MM/dd/yyyy" // Format the date
+                  maxDate={new Date()} // Don't allow selecting future dates
+                  placeholderText="Select Date of Birth"
+                  showYearDropdown // Enable dropdown for years
+                  showMonthDropdown
+                  scrollableYearDropdown // Makes the year dropdown scrollable for convenience
+                  yearDropdownItemNumber={30} // Display the past 100 years in the dropdown                
+                />
+                <CalendarIcon className="absolute top-1/2 left-3 transform -translate-y-1/2 h-5 w-5 text-gray-500" />
+                  </div>
+              </div>
+
+
+                            {/* Subject Selection */}
+                  <div className="flex flex-col relative mb-4">
+                    <label className="block text-lg text-left text-green-500">
+                      Select Subjects:
+                    </label>
+
+                    {/* Dropdown Trigger */}
+                    <button
+                      type="button"
+                      onClick={() => setSubjectOpen(!subjectOpen)}
+                      className="w-full p-2 mt-1 rounded bg-white text-black transform hover:scale-105 hover:bg-red-500 hover:text-yellow-500 transition-all duration-300 flex justify-between items-center border"
+                    >
+                      <span>
+                        {selectedSubjects.length > 0
+                          ? selectedSubjects.join(", ")
+                          : "Select Subjects"}
+                      </span>
+                      <ChevronDownIcon className="h-4 w-4" />
+                    </button>
+
+                    {/* Dropdown List */}
+                    {subjectOpen && (
+                      <div className="absolute w-full mt-2 rounded bg-white shadow z-10 border">
+                        <div className="max-h-40 overflow-y-auto">
+                          {subjects.map((subject) => (
+                            <label key={subject} className="flex items-center px-4 py-2">
+                              <input
+                                type="checkbox"
+                                checked={selectedSubjects.includes(subject)}
+                                onChange={() => handleSubjectSelect(subject)}
+                                className="mr-2"
+                              />
+                              <span>{subject}</span>
+                            </label>
+                          ))}
+                        </div>
+
+                        {/* Done Button */}
+                        <button
+                          type="button"
+                          onClick={() => setSubjectOpen(false)}
+                          className="w-full bg-green-500 text-white px-4 py-2 text-center hover:bg-green-700"
+                        >
+                          Done
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+
+                              {/* Phone Number input */}
+              <div className="flex flex-col">
+                <Label htmlFor="phoneNumber" className="text-left text-green-500">
+                  Phone Number (Canada)
+                </Label>
+                <SegmentedPhoneInput onChange={setPhoneNumber} />
+              </div>
 
           {/* Submit button */}
           <div className="flex justify-center">
@@ -171,3 +255,107 @@ export default function EnrollmentForm() {
     </div>
   );
 }
+
+const SegmentedPhoneInput = ({ onChange }: { onChange: (value: string) => void }) => {
+  const [values, setValues] = useState(['', '', '']);
+  const [isHovering, setIsHovering] = useState(false);
+  const inputRefs = [
+    useRef<HTMLInputElement>(null),
+    useRef<HTMLInputElement>(null),
+    useRef<HTMLInputElement>(null)
+  ];
+
+  useEffect(() => {
+    const fullNumber = values.join('').length === 10 ? values.join('-') : '';
+    onChange(fullNumber);
+  }, [values, onChange]);
+
+  const handleChange = (index: number, value: string) => {
+    value = value.replace(/\D/g, '');
+    const maxLength = index === 2 ? 4 : 3;
+    
+    const newValues = [...values];
+    newValues[index] = value.slice(0, maxLength);
+    setValues(newValues);
+
+    if (value.length >= maxLength && index < 2) {
+      inputRefs[index + 1].current?.focus();
+    }
+  };
+
+  const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Backspace' && !values[index] && index > 0) {
+      inputRefs[index - 1].current?.focus();
+    }
+  };
+
+  const handlePaste = (e: React.ClipboardEvent) => {
+    e.preventDefault();
+    const paste = e.clipboardData.getData('text').replace(/\D/g, '');
+    if (paste.length > 0) {
+      const newValues = [
+        paste.slice(0, 3),
+        paste.slice(3, 6),
+        paste.slice(6, 10)
+      ];
+      setValues(newValues);
+    }
+  };
+
+  const isComplete = values.join('').length === 10;
+  const shouldBeRed = !isComplete && values.some(v => v.length > 0) || (!isComplete && isHovering);
+
+  const inputClassName = `w-16 h-12 text-center text-lg border rounded-lg 
+    transform hover:scale-105 transition-all duration-300
+    ${shouldBeRed ? 'bg-red-500 text-yellow-500' : 'bg-white text-black'}`;
+
+  const lastInputClassName = `w-20 h-12 text-center text-lg border rounded-lg 
+    transform hover:scale-105 transition-all duration-300
+    ${shouldBeRed ? 'bg-red-500 text-yellow-500' : 'bg-white text-black'}`;
+
+  return (
+    <div 
+      className="flex flex-col mt-4"
+      onMouseEnter={() => setIsHovering(true)}
+      onMouseLeave={() => setIsHovering(false)}
+    >
+      <div className="flex items-center gap-2">
+        <input
+          ref={inputRefs[0]}
+          type="text"
+          value={values[0]}
+          onChange={(e) => handleChange(0, e.target.value)}
+          onKeyDown={(e) => handleKeyDown(0, e)}
+          onPaste={handlePaste}
+          maxLength={3}
+          className={inputClassName}
+          placeholder="123"
+        />
+        <span className="text-lg text-gray-500">-</span>
+        <input
+          ref={inputRefs[1]}
+          type="text"
+          value={values[1]}
+          onChange={(e) => handleChange(1, e.target.value)}
+          onKeyDown={(e) => handleKeyDown(1, e)}
+          onPaste={handlePaste}
+          maxLength={3}
+          className={inputClassName}
+          placeholder="456"
+        />
+        <span className="text-lg text-gray-500">-</span>
+        <input
+          ref={inputRefs[2]}
+          type="text"
+          value={values[2]}
+          onChange={(e) => handleChange(2, e.target.value)}
+          onKeyDown={(e) => handleKeyDown(2, e)}
+          onPaste={handlePaste}
+          maxLength={4}
+          className={lastInputClassName}
+          placeholder="7890"
+        />
+      </div>
+    </div>
+  );
+};
