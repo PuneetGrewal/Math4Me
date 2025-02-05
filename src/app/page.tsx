@@ -8,23 +8,36 @@ import { CalendarIcon } from "@heroicons/react/24/outline";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PhoneIcon } from "@heroicons/react/24/outline";
-
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css"
 
 const locations = ["Royal Oak", "OakBay", "Langford"];
 
 export default function EnrollmentForm() {
-  const [name, setName] = useState("");
+  const [student_name, setStudentName] = useState("");
   const [email, setEmail] = useState("");
   const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
   const [dob, setDob] = useState<Date | null>(null); // State for date of birth
-  const [phoneNumber, setPhoneNumber] = useState("");
+  const [phoneNumber1, setPhoneNumber1] = useState("");
+  const [phoneNumber2, setPhoneNumber2] = useState("");
   const [subjectOpen, setSubjectOpen] = useState(false);
   const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
   const subjects = ["Math", "Chemistry", "Biology", "Science", "Physics"];
+  const [relationship, setRelationship] = useState("");
+  const [customRelationship, setCustomRelationship] = useState("");
+  const relationships = ["Father", "Mother", "Other"];
+  const [parent_name, setParentName] = useState("");
+
+
+  const handleRelationSelect = (value: string) => {
+    setRelationship(value);
+    if (value !== "Other") {
+      setCustomRelationship(""); // Clear custom input if not selecting "Other"
+    }
+    setOpen(false);
+  };
 
   let hoverTimeout: NodeJS.Timeout;
 
@@ -63,22 +76,33 @@ export default function EnrollmentForm() {
       alert("Please select at least one location.");
       return;
     }
+
+    const finalRelationship = relationship === "Other" ? customRelationship : relationship;
+
+    if (!finalRelationship) {
+      alert("Please select or enter a relationship.");
+      return;
+    }
+
     const formattedDob = dob.toISOString().split("T")[0];
 
-    const enrollmentData = { name, email, locations: selectedLocations, dob: formattedDob, subjects: selectedSubjects, phoneNumber };
+    const enrollmentData = { student_name, parent_name, email, locations: selectedLocations, dob: formattedDob, subjects: selectedSubjects, phoneNumber1, phoneNumber2, relationship: finalRelationship };
 
     const { error } = await supabase.from("enrollments").insert([enrollmentData]);
     if (error) {
       console.error("Error saving data:", error);
     } else {
       setSuccessMessage("Enrollment successful!");
-      setName("");
+      setStudentName("");
+      setParentName("");
       setEmail("");
-      setPhoneNumber("");
+      setPhoneNumber1("");
+      setPhoneNumber2("");
       setSelectedLocations([]);
       setDob(null);
       setSelectedSubjects([]);
-
+      setCustomRelationship("");
+      setRelationship("");
     }
   };
 
@@ -89,6 +113,7 @@ export default function EnrollmentForm() {
           ENROLLMENT FORM
         </h1>
         <form onSubmit={handleSubmit} className="space-y-4">
+
           {/* Name input */}
           <div className="flex flex-col">
             <label htmlFor="name" className="block text-lg text-left">
@@ -97,8 +122,8 @@ export default function EnrollmentForm() {
             <input
               id="name"
               type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              value={student_name}
+              onChange={(e) => setStudentName(e.target.value)}
               className="w-full p-2 mt-1 rounded border border-black bg-white text-black transform hover:scale-105 hover:bg-red-500 hover:text-yellow-500 transition-all duration-300 font-extrabold text-lg"
               placeholder="Enter full name"
             />
@@ -229,14 +254,95 @@ export default function EnrollmentForm() {
                     )}
                   </div>
 
+                  <h2>
+                    Parent Contact Information
+                  </h2>
 
-                              {/* Phone Number input */}
+                  {/* Parent/Guardian Name 1 */}
+          <div className="flex flex-col">
+            <label htmlFor="name" className="block text-lg text-left">
+            Guardian/Parent Full Name
+            </label>
+            <input
+              id="name"
+              type="text"
+              value={parent_name}
+              onChange={(e) => setParentName(e.target.value)}
+              className="w-full p-2 mt-1 rounded border border-black bg-white text-black transform hover:scale-105 hover:bg-red-500 hover:text-yellow-500 transition-all duration-300 font-extrabold text-lg"
+              placeholder="Enter full name"
+            />
+          </div>
+
+
+
+                  {/* Guardian/Parent Phone Number 1 */}
               <div className="flex flex-col">
                 <Label htmlFor="phoneNumber" className="text-left text-black-500">
-                  Phone Number (Canada)
+                  Guardian/Parent Phone Number 1
                 </Label>
-                <SegmentedPhoneInput onChange={setPhoneNumber} />
+                <SegmentedPhoneInput onChange={setPhoneNumber1} />
               </div>
+
+            
+              {/* Guardian/Parent Phone Number 2 */}
+              <div className="flex flex-col">
+                <Label htmlFor="phoneNumber" className="text-left text-black-500">
+                  Guardian/Parent Phone Number 2
+                </Label>
+                <SegmentedPhoneInput onChange={setPhoneNumber2} />
+              </div>
+
+
+                
+                          {/* Dropdown for Relationship */}
+                    <div className="flex flex-col relative mb-4">
+      <label className="block text-lg text-left text-black-500">Relationship to Student:</label>
+
+                         {/* Dropdown Trigger */}
+                            <button
+                              type="button"
+                              className="w-full p-2 mt-1 rounded border bg-white text-black flex justify-between items-center"
+                              onClick={() => setOpen(!open)}
+                            >
+                              <span>{relationship || "Select Relationship"}</span>
+                              <ChevronDownIcon className="h-4 w-4" />
+                            </button>
+
+                            {/* Dropdown List */}
+                            {open && (
+                              <div className="absolute w-full mt-2 rounded bg-white shadow z-10 border">
+                                {relationships.map((relation) => (
+                                  <button
+                                    key={relation}
+                                    type="button"
+                                    className="w-full px-4 py-2 text-left hover:bg-gray-200"
+                                    onClick={() => handleRelationSelect(relation)}
+                                  >
+                                    {relation}
+                                  </button>
+                                ))}
+                              </div>
+                            )}
+
+                            {/* Custom Relationship Input */}
+                            {relationship === "Other" && (
+                              <input
+                                type="text"
+                                value={customRelationship}
+                                onChange={(e) => setCustomRelationship(e.target.value)}
+                                className="w-full p-2 mt-2 border rounded"
+                                placeholder="Specify relationship"
+                              />
+                            )}
+
+                            {/* Submit Button */}
+                            {/* <button
+                              onClick={handleSubmit}
+                              className="bg-blue-500 text-white px-4 py-2 mt-4 rounded hover:bg-blue-600"
+                            >
+                              Submit Relationship
+                            </button> */}
+                          </div>
 
           {/* Submit button */}
           <div className="flex justify-center">
