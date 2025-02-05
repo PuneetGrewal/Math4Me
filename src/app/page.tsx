@@ -83,9 +83,9 @@ export default function EnrollmentForm() {
   };
 
   return (
-    <div className="p-8 bg-black text-green-500 font-bold min-h-screen flex justify-center items-center">
+    <div className="p-8 bg-white text-black-500 font-bold min-h-screen flex justify-center items-center">
       <div className="w-full max-w-md">
-        <h1 className="text-3xl mb-4 text-stroke text-center">
+        <h1 className="text-3xl mb-4 text-center">
           ENROLLMENT FORM
         </h1>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -99,7 +99,7 @@ export default function EnrollmentForm() {
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full p-2 mt-1 rounded bg-white text-black transform hover:scale-105 hover:bg-red-500 hover:text-yellow-500 transition-all duration-300 font-extrabold text-lg"
+              className="w-full p-2 mt-1 rounded border border-black bg-white text-black transform hover:scale-105 hover:bg-red-500 hover:text-yellow-500 transition-all duration-300 font-extrabold text-lg"
               placeholder="Enter full name"
             />
           </div>
@@ -114,7 +114,7 @@ export default function EnrollmentForm() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full p-2 mt-1 rounded bg-white text-black transform hover:scale-105 hover:bg-red-500 hover:text-yellow-500 transition-all duration-300"
+              className="w-full p-2 mt-1 border border-black rounded bg-white text-black transform hover:scale-105 hover:bg-red-500 hover:text-yellow-500 transition-all duration-300 font-extrabold text-lg"
               placeholder="Enter email address"
             />
           </div>
@@ -125,14 +125,14 @@ export default function EnrollmentForm() {
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
           >
-            <label className="block text-lg text-left text-green-500">
+            <label className="block text-lg text-left text-black-500">
               Select TEST Location:
             </label>
 
             {/* Dropdown Trigger */}
             <button
               type="button"
-              className="w-full p-2 mt-1 rounded bg-white text-black transform hover:scale-105 hover:bg-red-500 hover:text-yellow-500 transition-all duration-300 flex justify-between items-center border"
+              className="w-full p-2 mt-1 rounded border-black bg-white text-black transform hover:scale-105 hover:bg-red-500 hover:text-yellow-500 transition-all duration-300 flex justify-between items-center border"
             >
               <span>
                 {selectedLocations.length > 0
@@ -161,7 +161,7 @@ export default function EnrollmentForm() {
 
                 {/* Date of Birth input */}
               <div className="flex flex-col">
-                <h2 className="text-xl font-bold text-green-500 mb-2">Child's Date of Birth</h2> {/* Title */}
+                <h2 className="text-xl font-bold text-black-500 mb-2">Child's Date of Birth</h2> {/* Title */}
                 <div className="relative">
                 <DatePicker
                   selected={dob}
@@ -182,7 +182,7 @@ export default function EnrollmentForm() {
 
                             {/* Subject Selection */}
                   <div className="flex flex-col relative mb-4">
-                    <label className="block text-lg text-left text-green-500">
+                    <label className="block text-lg text-left text-black-500">
                       Select Subjects:
                     </label>
 
@@ -202,7 +202,7 @@ export default function EnrollmentForm() {
 
                     {/* Dropdown List */}
                     {subjectOpen && (
-                      <div className="absolute w-full mt-2 rounded bg-white shadow z-10 border">
+                      <div className="absolute w-full mt-2 rounded bg-red-500 text-yellow-500 shadow z-10 border">
                         <div className="max-h-40 overflow-y-auto">
                           {subjects.map((subject) => (
                             <label key={subject} className="flex items-center px-4 py-2">
@@ -221,9 +221,9 @@ export default function EnrollmentForm() {
                         <button
                           type="button"
                           onClick={() => setSubjectOpen(false)}
-                          className="w-full bg-green-500 text-white px-4 py-2 text-center hover:bg-green-700"
+                          className="w-full bg-white text-black px-4 py-2 text-center rounded hover:bg-red-500 hover:text-yellow-500 transform hover:scale-105 transition-all duration-300"
                         >
-                          Done
+                          Done TEST
                         </button>
                       </div>
                     )}
@@ -232,7 +232,7 @@ export default function EnrollmentForm() {
 
                               {/* Phone Number input */}
               <div className="flex flex-col">
-                <Label htmlFor="phoneNumber" className="text-left text-green-500">
+                <Label htmlFor="phoneNumber" className="text-left text-black-500">
                   Phone Number (Canada)
                 </Label>
                 <SegmentedPhoneInput onChange={setPhoneNumber} />
