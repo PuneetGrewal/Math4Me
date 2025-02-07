@@ -302,6 +302,7 @@ export default function EnrollmentForm() {
                             <button
                               type="button"
                               className="w-full p-2 mt-1 rounded border bg-white text-black flex justify-between items-center"
+                              //Need to fix this
                               onClick={() => setOpen(!open)}
                             >
                               <span>{relationship || "Select Relationship"}</span>
@@ -334,6 +335,8 @@ export default function EnrollmentForm() {
                                 placeholder="Specify relationship"
                               />
                             )}
+
+                           { /* DO not add for now */}
 
                             {/* Submit Button */}
                             {/* <button
