@@ -15,10 +15,10 @@ const locations = ["Royal Oak", "OakBay", "Langford"];
 
 export default function EnrollmentForm() {
   const [student_name, setStudentName] = useState("");
+  const [school, setSchoolName] = useState("");
   const [email, setEmail] = useState("");
   const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [open, setOpen] = useState(false);
   const [dob, setDob] = useState<Date | null>(null); // State for date of birth
   const [phoneNumber1, setPhoneNumber1] = useState("");
   const [phoneNumber2, setPhoneNumber2] = useState("");
@@ -32,17 +32,11 @@ export default function EnrollmentForm() {
   const [showResetButton, setShowResetButton] = useState(false);
   const phoneInput1Ref = useRef<any>(null);
   const phoneInput2Ref = useRef<any>(null);
+  const [locationDropdownOpen, setLocationDropdownOpen] = useState(false);
+  const [relationshipDropdownOpen, setRelationshipDropdownOpen] = useState(false);
 
   const resetForm = () => {
     window.location.reload();
-  };
-
-  const handleRelationSelect = (value: string) => {
-    setRelationship(value);
-    if (value !== "Other") {
-      setCustomRelationship(""); // Clear custom input if not selecting "Other"
-    }
-    setOpen(false);
   };
 
   let hoverTimeout: NodeJS.Timeout;
@@ -56,23 +50,47 @@ export default function EnrollmentForm() {
     });
   };
 
+  // Update the handleRelationSelect function
+  const handleRelationSelect = (value: string) => {
+    setRelationship(value);
+    if (value !== "Other") {
+      setCustomRelationship("");
+    }
+    setRelationshipDropdownOpen(false);
+  };
+
+  // Update the handleSelect function for locations
   const handleSelect = (location: string) => {
     setSelectedLocations((prev) =>
       prev.includes(location)
         ? prev.filter((item) => item !== location)
         : [...prev, location]
     );
-    setOpen(false);
+    setLocationDropdownOpen(false);
   };
 
-  const handleMouseEnter = () => {
-    clearTimeout(hoverTimeout);
-    hoverTimeout = setTimeout(() => setOpen(true), 700);
+  let locationHoverTimeout: NodeJS.Timeout;
+  let relationshipHoverTimeout: NodeJS.Timeout;
+
+  // Update the handler functions
+  const handleLocationMouseEnter = () => {
+    clearTimeout(locationHoverTimeout);
+    locationHoverTimeout = setTimeout(() => setLocationDropdownOpen(true), 700);
   };
 
-  const handleMouseLeave = () => {
-    clearTimeout(hoverTimeout);
-    hoverTimeout = setTimeout(() => setOpen(false), 500);
+  const handleLocationMouseLeave = () => {
+    clearTimeout(locationHoverTimeout);
+    locationHoverTimeout = setTimeout(() => setLocationDropdownOpen(false), 500);
+  };
+
+  const handleRelationshipMouseEnter = () => {
+    clearTimeout(relationshipHoverTimeout);
+    relationshipHoverTimeout = setTimeout(() => setRelationshipDropdownOpen(true), 700);
+  };
+
+  const handleRelationshipMouseLeave = () => {
+    clearTimeout(relationshipHoverTimeout);
+    relationshipHoverTimeout = setTimeout(() => setRelationshipDropdownOpen(false), 500);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -99,6 +117,7 @@ export default function EnrollmentForm() {
 
     const enrollmentData = {
       student_name,
+      school,
       parent_name,
       email,
       locations: selectedLocations,
@@ -119,6 +138,7 @@ export default function EnrollmentForm() {
         setSuccessMessage("Enrollment successful!");
         // Reset all form fields
         setStudentName("");
+        setSchoolName("");
         setParentName("");
         setEmail("");
         setSelectedLocations([]);
@@ -149,6 +169,8 @@ export default function EnrollmentForm() {
         <h1 className="text-3xl mb-4 text-center">
           ENROLLMENT FORM
         </h1>
+        <h2 className="text-xl font-bold text-black-500 mb-2">Student Information</h2>
+
 
         {successMessage && (
           <div className="mb-4 p-4 bg-green-100 text-green-700 rounded-md text-center">
@@ -191,8 +213,8 @@ export default function EnrollmentForm() {
           {/* Location Selection */}
           <div
             className="flex flex-col relative mb-4"
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
+            onMouseEnter={handleLocationMouseEnter}
+            onMouseLeave={handleLocationMouseLeave}
           >
             <label className="block text-lg text-left text-black-500">
               Select TEST Location:
@@ -201,9 +223,9 @@ export default function EnrollmentForm() {
             {/* Dropdown Trigger */}
             <button
               type="button"
-              className="w-full p-2 mt-1 rounded border-black bg-white text-black transform hover:scale-105 hover:bg-red-500 hover:text-yellow-500 transition-all duration-300 flex justify-between items-center border"
+              className="w-full p-2 mt-1 rounded border-black bg-white text-grey transform hover:scale-105 hover:bg-red-500 hover:text-yellow-500 transition-all duration-300 flex justify-between items-center border"
             >
-              <span>
+            <span className={selectedLocations.length > 0 ? "" : "text-gray-400 font-extrabold text-lg"}>
                 {selectedLocations.length > 0
                   ? selectedLocations.join(", ")
                   : "Select Location"}
@@ -212,7 +234,7 @@ export default function EnrollmentForm() {
             </button>
 
             {/* Dropdown List */}
-            {open && (
+            {locationDropdownOpen && (
               <div className="absolute w-full mt-2 rounded bg-white shadow z-10 border">
                 {locations.map((location) => (
                   <button
@@ -228,9 +250,25 @@ export default function EnrollmentForm() {
             )}
           </div>
 
+
+          {/* School input */}
+          <div className="flex flex-col">
+            <label htmlFor="name" className="block text-lg text-left">
+              Student's Current School Name
+            </label>
+            <input
+              id="name"
+              type="text"
+              value={school}
+              onChange={(e) => setSchoolName(e.target.value)}
+              className="w-full p-2 mt-1 rounded border border-black bg-white text-black transform hover:scale-105 hover:bg-red-500 hover:text-yellow-500 transition-all duration-300 font-extrabold text-lg"
+              placeholder="Enter School Name"
+            />
+          </div>
+
                 {/* Date of Birth input */}
               <div className="flex flex-col">
-                <h2 className="text-xl font-bold text-black-500 mb-2">Child's Date of Birth</h2> {/* Title */}
+                <label className="text-xl font-bold text-black-500 mb-2">Child's Date of Birth</label>
                 <div className="relative">
                 <DatePicker
                   selected={dob}
@@ -264,7 +302,7 @@ export default function EnrollmentForm() {
                       <span>
                         {selectedSubjects.length > 0
                           ? selectedSubjects.join(", ")
-                          : "Select Subjects"}
+                          : "Choose all that apply"}
                       </span>
                       <ChevronDownIcon className="h-4 w-4" />
                     </button>
@@ -298,13 +336,12 @@ export default function EnrollmentForm() {
                     )}
                   </div>
 
-                  <h2>
-                    Parent Contact Information
-                  </h2>
+              
 
                   {/* Parent/Guardian Name 1 */}
           <div className="flex flex-col">
-            <label htmlFor="name" className="block text-lg text-left">
+          <h2 className="text-xl font-bold text-black-500 mb-2">Parent Information</h2>
+            <label htmlFor="name" className="block text-left">
             Guardian/Parent Full Name
             </label>
             <input
@@ -339,58 +376,52 @@ export default function EnrollmentForm() {
 
 
                 
-                  {/* Dropdown for Relationship */}
-                    <div className="flex flex-col relative mb-4">
-      <label className="block text-lg text-left text-black-500">Relationship to Student:</label>
+                      {/* Dropdown for Relationship */}
+                      <div 
+                        className="flex flex-col relative mb-4"
+                        onMouseEnter={handleRelationshipMouseEnter}
+                        onMouseLeave={handleRelationshipMouseLeave}
+                      >
+                        <label className="block text-lg text-left text-black-500">
+                          Relationship to Student:
+                        </label>
 
-                         {/* Dropdown Trigger */}
-                            <button
-                              type="button"
-                              className="w-full p-2 mt-1 rounded border bg-white text-black flex justify-between items-center"
-                              //Need to fix this
-                              onClick={() => setOpen(!open)}
-                            >
-                              <span>{relationship || "Select Relationship"}</span>
-                              <ChevronDownIcon className="h-4 w-4" />
-                            </button>
+                        {/* Dropdown Trigger */}
+                        <button
+                          type="button"
+                          className="w-full p-2 mt-1 rounded border bg-white text-black flex justify-between items-center transform hover:scale-105 hover:bg-red-500 hover:text-yellow-500 transition-all duration-300"
+                        >
+                          <span>{relationship || "Select Relationship"}</span>
+                          <ChevronDownIcon className="h-4 w-4" />
+                        </button>
 
-                            {/* Dropdown List */}
-                            {open && (
-                              <div className="absolute w-full mt-2 rounded bg-white shadow z-10 border">
-                                {relationships.map((relation) => (
-                                  <button
-                                    key={relation}
-                                    type="button"
-                                    className="w-full px-4 py-2 text-left hover:bg-gray-200"
-                                    onClick={() => handleRelationSelect(relation)}
-                                  >
-                                    {relation}
-                                  </button>
-                                ))}
-                              </div>
-                            )}
-
-                            {/* Custom Relationship Input */}
-                            {relationship === "Other" && (
-                              <input
-                                type="text"
-                                value={customRelationship}
-                                onChange={(e) => setCustomRelationship(e.target.value)}
-                                className="w-full p-2 mt-2 border rounded"
-                                placeholder="Specify relationship"
-                              />
-                            )}
-
-                           { /* DO not add for now */}
-
-                            {/* Submit Button */}
-                            {/* <button
-                              onClick={handleSubmit}
-                              className="bg-blue-500 text-white px-4 py-2 mt-4 rounded hover:bg-blue-600"
-                            >
-                              Submit Relationship
-                            </button> */}
+                        {/* Dropdown List */}
+                        {relationshipDropdownOpen && (
+                          <div className="absolute w-full mt-2 rounded bg-white shadow z-10 border">
+                            {relationships.map((relation) => (
+                              <button
+                                key={relation}
+                                type="button"
+                                className="w-full px-4 py-2 text-left rounded bg-white text-black transform hover:scale-105 hover:bg-red-500 hover:text-yellow-500 transition-all duration-300 flex justify-between items-center"
+                                onClick={() => handleRelationSelect(relation)}
+                              >
+                                {relation}
+                              </button>
+                            ))}
                           </div>
+                        )}
+
+                        {/* Custom Relationship Input */}
+                        {relationship === "Other" && (
+                          <input
+                            type="text"
+                            value={customRelationship}
+                            onChange={(e) => setCustomRelationship(e.target.value)}
+                            className="w-full px-4 py-2 text-left rounded bg-white text-black transform hover:scale-105 hover:bg-red-500 hover:text-yellow-500 transition-all duration-300 flex justify-between items-center"
+                            placeholder="Specify relationship"
+                          />
+                        )}
+                      </div>
 
           {/* Submit button */}
           <div className="flex justify-center">
@@ -523,6 +554,3 @@ const SegmentedPhoneInput = React.forwardRef<SegmentedPhoneInputRef, { onChange:
     );
   }
 );
-
-// Add display name for better debugging
-SegmentedPhoneInput.displayName = 'SegmentedPhoneInput';
