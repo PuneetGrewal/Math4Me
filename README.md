@@ -35,16 +35,12 @@ This is a web application designed to streamline the enrollment process for a tu
 2. **Install dependencies: Run the following command to install the required packages**:
 
 ```bash
-Copy
-Edit
 npm install
 ```
 
 3. **Set up environment variables: Create a .env.local file in the root of the project and add your Supabase API keys (and other necessary environment variables)**:
 
-
 ```bash
-Edit
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
@@ -52,8 +48,6 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 4. **Run the development server: Start the local development server**:
 
 ```bash
-Copy
-Edit
 npm run dev
 ```
 The site will be accessible at http://localhost:3000.
