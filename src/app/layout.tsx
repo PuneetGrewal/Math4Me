@@ -26,7 +26,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
 
-  const isMaintenanceMode = false; // Set this to true when you want the maintenance page
+  const isMaintenanceMode = process.env.NEXT_PUBLIC_MAINTENANCE_MODE === 'true';
 
   if (isMaintenanceMode) {
     // Redirect all traffic to the maintenance page
