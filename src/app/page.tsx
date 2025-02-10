@@ -272,7 +272,7 @@ export default function EnrollmentForm() {
                 <div className="relative">
                 <DatePicker
                   selected={dob}
-                  onChange={(date: Date) => setDob(date)}
+                  onChange={(date: Date | null) => setDob(date)}
                   className="w-full p-2 mt-1 rounded bg-white text-black transform hover:scale-105 hover:bg-red-500 hover:text-yellow-500 transition-all duration-300 pl-10"
                   dateFormat="MM/dd/yyyy" // Format the date
                   maxDate={new Date()} // Don't allow selecting future dates
