@@ -32,7 +32,7 @@ This is a web application designed to streamline the enrollment process for a tu
    cd Math4Me
    ```
 
-2. **Install dependencies: Run the following command to install the required packages:
+2. **Install dependencies: Run the following command to install the required packages**:
 
 ```bash
 Copy
@@ -40,7 +40,7 @@ Edit
 npm install
 ```
 
-3. **Set up environment variables: Create a .env.local file in the root of the project and add your Supabase API keys (and other necessary environment variables):
+3. **Set up environment variables: Create a .env.local file in the root of the project and add your Supabase API keys (and other necessary environment variables)**:
 
 
 ```bash
@@ -49,7 +49,7 @@ NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
 
-4. **Run the development server: Start the local development server:
+4. **Run the development server: Start the local development server**:
 
 ```bash
 Copy
