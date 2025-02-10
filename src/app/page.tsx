@@ -167,7 +167,7 @@ export default function EnrollmentForm() {
     <div className="p-8 bg-white text-black-500 font-bold min-h-screen flex justify-center items-center">
       <div className="w-full max-w-md">
         <h1 className="text-3xl mb-4 text-center">
-          ENROLLMENT FORM
+          ENROLLMENT VERCEL FORM
         </h1>
         <h2 className="text-xl font-bold text-black-500 mb-2">Student Information</h2>
 
