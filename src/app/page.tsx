@@ -29,7 +29,13 @@ export default function EnrollmentForm() {
   const [customRelationship, setCustomRelationship] = useState("");
   const relationships = ["Father", "Mother", "Other"];
   const [parent_name, setParentName] = useState("");
+  const [showResetButton, setShowResetButton] = useState(false);
+  const phoneInput1Ref = useRef<any>(null);
+  const phoneInput2Ref = useRef<any>(null);
 
+  const resetForm = () => {
+    window.location.reload();
+  };
 
   const handleRelationSelect = (value: string) => {
     setRelationship(value);
@@ -84,25 +90,56 @@ export default function EnrollmentForm() {
       return;
     }
 
+    if (!dob) {
+      alert("Please select a date of birth.");
+      return;
+    }
+
     const formattedDob = dob.toISOString().split("T")[0];
 
-    const enrollmentData = { student_name, parent_name, email, locations: selectedLocations, dob: formattedDob, subjects: selectedSubjects, phoneNumber1, phoneNumber2, relationship: finalRelationship };
+    const enrollmentData = {
+      student_name,
+      parent_name,
+      email,
+      locations: selectedLocations,
+      dob: formattedDob,
+      subjects: selectedSubjects,
+      phoneNumber1,
+      phoneNumber2,
+      relationship: finalRelationship
+    };
 
-    const { error } = await supabase.from("enrollments").insert([enrollmentData]);
-    if (error) {
-      console.error("Error saving data:", error);
-    } else {
-      setSuccessMessage("Enrollment successful!");
-      setStudentName("");
-      setParentName("");
-      setEmail("");
-      setPhoneNumber1("");
-      setPhoneNumber2("");
-      setSelectedLocations([]);
-      setDob(null);
-      setSelectedSubjects([]);
-      setCustomRelationship("");
-      setRelationship("");
+    try {
+      const { error } = await supabase.from("enrollments").insert([enrollmentData]);
+      
+      if (error) {
+        console.error("Error saving data:", error);
+        alert("There was an error submitting the form. Please try again.");
+      } else {
+        setSuccessMessage("Enrollment successful!");
+        // Reset all form fields
+        setStudentName("");
+        setParentName("");
+        setEmail("");
+        setSelectedLocations([]);
+        setDob(null);
+        setSelectedSubjects([]);
+        setRelationship("");
+        setCustomRelationship("");
+        // Reset phone numbers in the SegmentedPhoneInput components
+        setPhoneNumber1("");
+        setPhoneNumber2("");
+
+        if (phoneInput1Ref.current) {
+          phoneInput1Ref.current.resetValues();
+        }
+        if (phoneInput2Ref.current) {
+          phoneInput2Ref.current.resetValues();
+        }
+      }
+    } catch (err) {
+      console.error("Error in form submission:", err);
+      alert("There was an error submitting the form. Please try again.");
     }
   };
 
@@ -112,6 +149,13 @@ export default function EnrollmentForm() {
         <h1 className="text-3xl mb-4 text-center">
           ENROLLMENT FORM
         </h1>
+
+        {successMessage && (
+          <div className="mb-4 p-4 bg-green-100 text-green-700 rounded-md text-center">
+            {successMessage}
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-4">
 
           {/* Name input */}
@@ -280,7 +324,8 @@ export default function EnrollmentForm() {
                 <Label htmlFor="phoneNumber" className="text-left text-black-500">
                   Guardian/Parent Phone Number 1
                 </Label>
-                <SegmentedPhoneInput onChange={setPhoneNumber1} />
+                <SegmentedPhoneInput ref={phoneInput1Ref} onChange={setPhoneNumber1} />
+
               </div>
 
             
@@ -289,12 +334,12 @@ export default function EnrollmentForm() {
                 <Label htmlFor="phoneNumber" className="text-left text-black-500">
                   Guardian/Parent Phone Number 2
                 </Label>
-                <SegmentedPhoneInput onChange={setPhoneNumber2} />
+                <SegmentedPhoneInput ref={phoneInput2Ref} onChange={setPhoneNumber2} />
               </div>
 
 
                 
-                          {/* Dropdown for Relationship */}
+                  {/* Dropdown for Relationship */}
                     <div className="flex flex-col relative mb-4">
       <label className="block text-lg text-left text-black-500">Relationship to Student:</label>
 
@@ -358,113 +403,126 @@ export default function EnrollmentForm() {
             </Button>
           </div>
         </form>
-
-        {successMessage && <p className="mt-4 text-white">{successMessage}</p>}
       </div>
     </div>
   );
 }
 
-const SegmentedPhoneInput = ({ onChange }: { onChange: (value: string) => void }) => {
-  const [values, setValues] = useState(['', '', '']);
-  const [isHovering, setIsHovering] = useState(false);
-  const inputRefs = [
-    useRef<HTMLInputElement>(null),
-    useRef<HTMLInputElement>(null),
-    useRef<HTMLInputElement>(null)
-  ];
+interface SegmentedPhoneInputRef {
+  resetValues: () => void;
+}
 
-  useEffect(() => {
-    const fullNumber = values.join('').length === 10 ? values.join('-') : '';
-    onChange(fullNumber);
-  }, [values, onChange]);
+const SegmentedPhoneInput = React.forwardRef<SegmentedPhoneInputRef, { onChange: (value: string) => void }>(
+  ({ onChange }, ref) => {
+    const [values, setValues] = useState(['', '', '']);
+    const [isHovering, setIsHovering] = useState(false);
+    const inputRefs = [
+      useRef<HTMLInputElement>(null),
+      useRef<HTMLInputElement>(null),
+      useRef<HTMLInputElement>(null)
+    ];
 
-  const handleChange = (index: number, value: string) => {
-    value = value.replace(/\D/g, '');
-    const maxLength = index === 2 ? 4 : 3;
-    
-    const newValues = [...values];
-    newValues[index] = value.slice(0, maxLength);
-    setValues(newValues);
+    React.useImperativeHandle(ref, () => ({
+      resetValues: () => {
+        setValues(['', '', '']);
+      }
+    }));
 
-    if (value.length >= maxLength && index < 2) {
-      inputRefs[index + 1].current?.focus();
-    }
-  };
+    useEffect(() => {
+      const fullNumber = values.join('').length === 10 ? values.join('-') : '';
+      onChange(fullNumber);
+    }, [values, onChange]);
 
-  const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Backspace' && !values[index] && index > 0) {
-      inputRefs[index - 1].current?.focus();
-    }
-  };
-
-  const handlePaste = (e: React.ClipboardEvent) => {
-    e.preventDefault();
-    const paste = e.clipboardData.getData('text').replace(/\D/g, '');
-    if (paste.length > 0) {
-      const newValues = [
-        paste.slice(0, 3),
-        paste.slice(3, 6),
-        paste.slice(6, 10)
-      ];
+    const handleChange = (index: number, value: string) => {
+      value = value.replace(/\D/g, '');
+      const maxLength = index === 2 ? 4 : 3;
+      
+      const newValues = [...values];
+      newValues[index] = value.slice(0, maxLength);
       setValues(newValues);
-    }
-  };
 
-  const isComplete = values.join('').length === 10;
-  const shouldBeRed = !isComplete && values.some(v => v.length > 0) || (!isComplete && isHovering);
+      if (value.length >= maxLength && index < 2) {
+        inputRefs[index + 1].current?.focus();
+      }
+    };
 
-  const inputClassName = `w-16 h-12 text-center text-lg border rounded-lg 
-    transform hover:scale-105 transition-all duration-300
-    ${shouldBeRed ? 'bg-red-500 text-yellow-500' : 'bg-white text-black'}`;
+    const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === 'Backspace' && !values[index] && index > 0) {
+        inputRefs[index - 1].current?.focus();
+      }
+    };
 
-  const lastInputClassName = `w-20 h-12 text-center text-lg border rounded-lg 
-    transform hover:scale-105 transition-all duration-300
-    ${shouldBeRed ? 'bg-red-500 text-yellow-500' : 'bg-white text-black'}`;
+    const handlePaste = (e: React.ClipboardEvent) => {
+      e.preventDefault();
+      const paste = e.clipboardData.getData('text').replace(/\D/g, '');
+      if (paste.length > 0) {
+        const newValues = [
+          paste.slice(0, 3),
+          paste.slice(3, 6),
+          paste.slice(6, 10)
+        ];
+        setValues(newValues);
+      }
+    };
 
-  return (
-    <div 
-      className="flex flex-col mt-4"
-      onMouseEnter={() => setIsHovering(true)}
-      onMouseLeave={() => setIsHovering(false)}
-    >
-      <div className="flex items-center gap-2">
-        <input
-          ref={inputRefs[0]}
-          type="text"
-          value={values[0]}
-          onChange={(e) => handleChange(0, e.target.value)}
-          onKeyDown={(e) => handleKeyDown(0, e)}
-          onPaste={handlePaste}
-          maxLength={3}
-          className={inputClassName}
-          placeholder="123"
-        />
-        <span className="text-lg text-gray-500">-</span>
-        <input
-          ref={inputRefs[1]}
-          type="text"
-          value={values[1]}
-          onChange={(e) => handleChange(1, e.target.value)}
-          onKeyDown={(e) => handleKeyDown(1, e)}
-          onPaste={handlePaste}
-          maxLength={3}
-          className={inputClassName}
-          placeholder="456"
-        />
-        <span className="text-lg text-gray-500">-</span>
-        <input
-          ref={inputRefs[2]}
-          type="text"
-          value={values[2]}
-          onChange={(e) => handleChange(2, e.target.value)}
-          onKeyDown={(e) => handleKeyDown(2, e)}
-          onPaste={handlePaste}
-          maxLength={4}
-          className={lastInputClassName}
-          placeholder="7890"
-        />
+    const isComplete = values.join('').length === 10;
+    const shouldBeRed = !isComplete && values.some(v => v.length > 0) || (!isComplete && isHovering);
+
+    const inputClassName = `w-16 h-12 text-center text-lg border rounded-lg 
+      transform hover:scale-105 transition-all duration-300
+      ${shouldBeRed ? 'bg-red-500 text-yellow-500' : 'bg-white text-black'}`;
+
+    const lastInputClassName = `w-20 h-12 text-center text-lg border rounded-lg 
+      transform hover:scale-105 transition-all duration-300
+      ${shouldBeRed ? 'bg-red-500 text-yellow-500' : 'bg-white text-black'}`;
+
+    return (
+      <div 
+        className="flex flex-col mt-4"
+        onMouseEnter={() => setIsHovering(true)}
+        onMouseLeave={() => setIsHovering(false)}
+      >
+        <div className="flex items-center gap-2">
+          <input
+            ref={inputRefs[0]}
+            type="text"
+            value={values[0]}
+            onChange={(e) => handleChange(0, e.target.value)}
+            onKeyDown={(e) => handleKeyDown(0, e)}
+            onPaste={handlePaste}
+            maxLength={3}
+            className={inputClassName}
+            placeholder="123"
+          />
+          <span className="text-lg text-gray-500">-</span>
+          <input
+            ref={inputRefs[1]}
+            type="text"
+            value={values[1]}
+            onChange={(e) => handleChange(1, e.target.value)}
+            onKeyDown={(e) => handleKeyDown(1, e)}
+            onPaste={handlePaste}
+            maxLength={3}
+            className={inputClassName}
+            placeholder="456"
+          />
+          <span className="text-lg text-gray-500">-</span>
+          <input
+            ref={inputRefs[2]}
+            type="text"
+            value={values[2]}
+            onChange={(e) => handleChange(2, e.target.value)}
+            onKeyDown={(e) => handleKeyDown(2, e)}
+            onPaste={handlePaste}
+            maxLength={4}
+            className={lastInputClassName}
+            placeholder="7890"
+          />
+        </div>
       </div>
-    </div>
-  );
-};
+    );
+  }
+);
+
+// Add display name for better debugging
+SegmentedPhoneInput.displayName = 'SegmentedPhoneInput';
