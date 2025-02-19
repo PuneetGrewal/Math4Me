@@ -3,6 +3,8 @@ import { Analytics } from '@vercel/analytics/next';
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ReactNode } from 'react';
+import Navbar from "@/components/navbar";
+
 
 
 const geistSans = Geist({
@@ -40,12 +42,10 @@ export default function RootLayout({
     );
   }
 
-
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className="antialiased">
+        <Navbar /> {/* Add Navbar at the top */}
         {children}
         <Analytics /> 
       </body>
